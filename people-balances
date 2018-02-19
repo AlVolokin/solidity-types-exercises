@@ -1,0 +1,75 @@
+pragma solidity ^0.4.20;
+
+contract PeopleBalances {
+    address owner;
+    mapping(address => uint) public balances;
+    mapping(address => bool) public tokenHolder;
+    address[] public tokenHolders;
+    uint campaignStart;
+    
+    modifier crowdsale() {
+        require(now - campaignStart < 5 minutes);
+        _;
+    }
+    
+    modifier openExchange() {
+        require(now - campaignStart >= 5 minutes);
+        _;
+    }
+    
+    modifier onlyOwner() {
+        require(owner == msg.sender);
+        _;
+    }
+    
+    function PeopleBalances() public{
+        owner = msg.sender;
+        campaignStart = now;
+    }
+    
+    function initialOffering(uint amount) crowdsale public payable{
+        balances[msg.sender] += amount / 5 ether;
+        tokenHolder[msg.sender] = true;
+        
+        bool duplicate = false;
+        for(uint i = 0; i < tokenHolders.length; i++){
+            if(tokenHolders[i] == msg.sender){
+                duplicate = true;
+                break;
+            }
+        }
+        if(duplicate == false){
+            tokenHolders.push(msg.sender);
+        }
+    }
+    
+    function secondaryMarket(address sendTo, uint amount) openExchange public{
+        require(balances[msg.sender] >= amount);
+        balances[sendTo] += amount;
+        balances[msg.sender] -= amount;
+        
+        bool duplicate = false;
+        for(uint i = 0; i < tokenHolders.length; i++){
+            if(tokenHolders[i] == sendTo){
+                duplicate = true;
+                break;
+            }
+        }
+        if(!duplicate){
+            tokenHolders.push(sendTo);
+            tokenHolder[sendTo] = true;
+        }
+        if(balances[msg.sender] == 0){
+            tokenHolder[msg.sender] = false;
+        }
+    }
+    
+    function withdraw(uint amount) onlyOwner public{
+        require((now - campaignStart > 1 years) && amount <= this.balance);
+        owner.transfer(amount);
+    }
+    
+    function getTokenHolders() public view returns(address[]){
+        return tokenHolders;
+    }
+}
