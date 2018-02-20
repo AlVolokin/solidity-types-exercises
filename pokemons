@@ -1,0 +1,31 @@
+pragma solidity ^0.4.20;
+
+contract Pokemons {
+    enum PokemonTypes { PokeOne, PokTwo, PokThree, PokFour, PokFive, PokSix, PokSeven, PokEigth, PokNine, PokTen }
+    struct Person {
+        uint8[10] caughtPokemonTypes;
+        uint256 timer;
+    }
+    
+    mapping (address => Person) public persons;
+    address[][10] public pokemonPossessors;
+    
+    function catchAPokemon(PokemonTypes _type) public returns(bool){
+        require(persons[msg.sender].timer + 15 seconds < now);
+        uint8 pokIndex = uint8(_type);
+        require(persons[msg.sender].caughtPokemonTypes[pokIndex] == 0);
+        persons[msg.sender].caughtPokemonTypes[pokIndex] = 1;
+        pokemonPossessors[pokIndex].push(msg.sender);
+        persons[msg.sender].timer = now;
+        
+        return true;
+    }
+    
+    function getPokemonTypesCaughtBy(address addr) public view returns(uint8[10]){
+        return persons[addr].caughtPokemonTypes;
+    }
+    
+    function getPersonsWhoCaught(PokemonTypes _type) public view returns(address[]){
+        return pokemonPossessors[uint8(_type)];
+    }
+} 
