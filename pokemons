@@ -3,7 +3,7 @@ pragma solidity ^0.4.20;
 contract Pokemons {
     enum PokemonTypes { PokeOne, PokTwo, PokThree, PokFour, PokFive, PokSix, PokSeven, PokEigth, PokNine, PokTen }
     struct Person {
-        uint8[10] caughtPokemonTypes;
+        bytes2[10] caughtPokemonTypes;
         uint256 timer;
     }
     
@@ -14,14 +14,14 @@ contract Pokemons {
         require(persons[msg.sender].timer + 15 seconds < now);
         uint8 pokIndex = uint8(_type);
         require(persons[msg.sender].caughtPokemonTypes[pokIndex] == 0);
-        persons[msg.sender].caughtPokemonTypes[pokIndex] = 1;
+        persons[msg.sender].caughtPokemonTypes[pokIndex] = bytes2(1);
         pokemonPossessors[pokIndex].push(msg.sender);
         persons[msg.sender].timer = now;
         
         return true;
     }
     
-    function getPokemonTypesCaughtBy(address addr) public view returns(uint8[10]){
+    function getPokemonTypesCaughtBy(address addr) public view returns(bytes2[10]){
         return persons[addr].caughtPokemonTypes;
     }
     
